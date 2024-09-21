@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import { Button, Card, Input } from "antd";
 const { Meta } = Card;
@@ -8,6 +8,7 @@ const BASE_URL = "https://www.themealdb.com/api/json/v1/1/search.php?";
 
 function App() {
   const [searchText, setSearchText] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [foodItems, setFoodItems] = useState([]);
 
   const handleSearchTextChange = (e) => {
@@ -15,14 +16,28 @@ function App() {
   };
 
   const handleSearch = () => {
+    setSearchQuery(searchText);
+  };
+
+  useEffect(() => {
+    let ignore = false;
+
+    console.log("running setup", ignore);
     const searchUrl = `${BASE_URL}s=${searchText}`;
     fetch(searchUrl)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        setFoodItems(data.meals);
+        if (!ignore) {
+          console.log(data);
+          setFoodItems(data.meals);
+        }
       });
-  };
+
+    return () => {
+      ignore = true;
+      console.log("running cleanup", ignore);
+    };
+  }, [searchQuery]);
 
   return (
     <div className="App">
